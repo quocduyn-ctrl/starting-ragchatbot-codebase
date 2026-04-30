@@ -1,0 +1,26 @@
+{
+    "tabWidth": 4,
+    "useTabs": false,
+    "printWidth": 100,
+    "singleQuote": true,
+    "semi": true,
+    "trailingComma": "es5",
+    "arrowParens": "always",
+    "endOfLine": "lf",
+    "bracketSameLine": false,
+    "htmlWhitespaceSensitivity": "css",
+    "overrides": [
+        {
+            "files": "*.{html,css}",
+            "options": {
+                "singleQuote": false
+            }
+        },
+        {
+            "files": "*.{json,md}",
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}
