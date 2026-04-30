@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton = document.getElementById('sendButton');
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
-    
+    newChatButton = document.getElementById('newChatButton');
+
     setupEventListeners();
     createNewSession();
     loadCourseStats();
@@ -28,8 +29,12 @@ function setupEventListeners() {
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
-    
-    
+
+    // New chat
+    if (newChatButton) {
+        newChatButton.addEventListener('click', startNewChat);
+    }
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -38,6 +43,36 @@ function setupEventListeners() {
             sendMessage();
         });
     });
+}
+
+async function startNewChat() {
+    const previousSessionId = currentSessionId;
+    try {
+        const response = await fetch(`${API_URL}/session/new`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: previousSessionId })
+        });
+        if (response.ok) {
+            const data = await response.json();
+            currentSessionId = data.session_id;
+        } else {
+            currentSessionId = null;
+        }
+    } catch (error) {
+        console.error('Failed to reset session on backend:', error);
+        currentSessionId = null;
+    }
+
+    chatInput.value = '';
+    chatMessages.innerHTML = '';
+    addMessage(
+        'Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?',
+        'assistant',
+        null,
+        true
+    );
+    chatInput.focus();
 }
 
 
@@ -122,10 +157,17 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     let html = `<div class="message-content">${displayContent}</div>`;
     
     if (sources && sources.length > 0) {
+        const sourceHtml = sources.map(s => {
+            const safeText = escapeHtml(s.text);
+            return s.link
+                ? `<a href="${escapeHtml(s.link)}" target="_blank" rel="noopener noreferrer">${safeText}</a>`
+                : safeText;
+        }).join(', ');
+
         html += `
             <details class="sources-collapsible">
                 <summary class="sources-header">Sources</summary>
-                <div class="sources-content">${sources.join(', ')}</div>
+                <div class="sources-content">${sourceHtml}</div>
             </details>
         `;
     }

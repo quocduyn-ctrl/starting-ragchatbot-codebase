@@ -10,7 +10,8 @@ class Config:
     """Configuration settings for the RAG system"""
     # Anthropic API settings
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
-    ANTHROPIC_MODEL: str = "claude-sonnet-4-20250514"
+    ANTHROPIC_BASE_URL: str = "https://inference-api.nvidia.com"
+    ANTHROPIC_MODEL: str = "aws/anthropic/bedrock-claude-sonnet-4-6"
     
     # Embedding model settings
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"

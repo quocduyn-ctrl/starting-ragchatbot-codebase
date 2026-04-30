@@ -21,9 +21,12 @@ App is served at `http://localhost:8000`. API docs at `http://localhost:8000/doc
 
 **First-time setup:**
 ```bash
+# requires Python >= 3.13
 uv sync                        # install dependencies
 cp .env.example .env           # then add ANTHROPIC_API_KEY to .env
 ```
+
+**Always use `uv` for Python operations in this project — never `pip` directly, and never the system Python.** Installs use `uv sync` / `uv add`; ad-hoc scripts use `uv run python ...`; the server uses `uv run uvicorn ...` (or `./run.sh`, which does the same).
 
 There is no test suite and no linter configured.
 
@@ -40,6 +43,12 @@ This is a RAG chatbot where the backend serves both the API and the frontend sta
 5. If Claude invokes the tool → `backend/search_tools.py` → `backend/vector_store.py` performs semantic search in ChromaDB and returns formatted chunks
 6. A second Claude API call synthesizes the chunks into a final answer
 7. Sources and session history are updated; `{ answer, sources, session_id }` is returned to the browser
+
+### Bedrock proxy quirk
+
+The second API call in `AIGenerator._handle_tool_execution` (`backend/ai_generator.py`) appends a plain text block after the tool results telling Claude not to call tools again. This is a workaround: Bedrock-proxied models ignore the "one search per query" rule in the system prompt and will attempt a second tool call otherwise. Preserve this text block when modifying the tool-handling flow — removing it re-introduces unbounded tool loops.
+
+Sessions are stored only in memory (`SessionManager` is a plain dict keyed by session id) — restarting the server clears all conversation history.
 
 ### Document ingestion (on startup)
 
@@ -71,7 +80,8 @@ Lesson 1: <lesson title>
 
 | Setting | Default | Effect |
 |---|---|---|
-| `ANTHROPIC_MODEL` | `claude-sonnet-4-20250514` | Claude model used for generation |
+| `ANTHROPIC_MODEL` | `aws/anthropic/bedrock-claude-sonnet-4-6` | Model ID — this is a Bedrock-routed model served via NVIDIA's proxy, not a native Anthropic model ID |
+| `ANTHROPIC_BASE_URL` | `https://inference-api.nvidia.com` | API endpoint — routes Claude calls through NVIDIA's inference proxy (not `api.anthropic.com`) |
 | `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | SentenceTransformer model for ChromaDB |
 | `CHUNK_SIZE` | `800` | Max chars per content chunk |
 | `CHUNK_OVERLAP` | `100` | Overlap between consecutive chunks |
