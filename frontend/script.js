@@ -5,7 +5,19 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatButton, themeToggle;
+
+// Apply the saved/preferred theme as early as possible to avoid a flash
+(function initThemeEarly() {
+    try {
+        const saved = localStorage.getItem('theme');
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        const theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+})();
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,11 +28,36 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
     newChatButton = document.getElementById('newChatButton');
+    themeToggle = document.getElementById('themeToggle');
 
+    syncThemeToggleState();
     setupEventListeners();
     createNewSession();
     loadCourseStats();
 });
+
+// Theme handling
+function syncThemeToggleState() {
+    if (!themeToggle) return;
+    const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+    themeToggle.setAttribute('aria-pressed', theme === 'light' ? 'true' : 'false');
+    themeToggle.setAttribute(
+        'aria-label',
+        theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'
+    );
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    try {
+        localStorage.setItem('theme', next);
+    } catch (e) {
+        // localStorage may be unavailable; ignore
+    }
+    syncThemeToggleState();
+}
 
 // Event Listeners
 function setupEventListeners() {
@@ -33,6 +70,11 @@ function setupEventListeners() {
     // New chat
     if (newChatButton) {
         newChatButton.addEventListener('click', startNewChat);
+    }
+
+    // Theme toggle (click + keyboard activation via Enter/Space is native for buttons)
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
     }
 
     // Suggested questions
