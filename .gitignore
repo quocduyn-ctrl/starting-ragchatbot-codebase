@@ -29,3 +29,7 @@ uploads/
 # OS
 .DS_Store
 Thumbs.db
+
+# Node / frontend tooling
+node_modules/
+npm-debug.log*

@@ -1,0 +1,14 @@
+{
+    "name": "ragchatbot-frontend-tooling",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Frontend code quality tooling for the RAG chatbot. The application itself is served by the FastAPI backend; this package only provides Prettier for formatting the static assets in frontend/.",
+    "scripts": {
+        "format": "prettier --write \"frontend/**/*.{html,css,js,json,md}\"",
+        "format:check": "prettier --check \"frontend/**/*.{html,css,js,json,md}\"",
+        "quality": "npm run format:check"
+    },
+    "devDependencies": {
+        "prettier": "^3.3.3"
+    }
+}

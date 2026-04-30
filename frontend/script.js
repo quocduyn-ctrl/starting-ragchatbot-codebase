@@ -78,7 +78,7 @@ function setupEventListeners() {
     }
 
     // Suggested questions
-    document.querySelectorAll('.suggested-item').forEach(button => {
+    document.querySelectorAll('.suggested-item').forEach((button) => {
         button.addEventListener('click', (e) => {
             const question = e.target.getAttribute('data-question');
             chatInput.value = question;
@@ -93,7 +93,7 @@ async function startNewChat() {
         const response = await fetch(`${API_URL}/session/new`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session_id: previousSessionId })
+            body: JSON.stringify({ session_id: previousSessionId }),
         });
         if (response.ok) {
             const data = await response.json();
@@ -116,7 +116,6 @@ async function startNewChat() {
     );
     chatInput.focus();
 }
-
 
 // Chat Functions
 async function sendMessage() {
@@ -144,14 +143,14 @@ async function sendMessage() {
             },
             body: JSON.stringify({
                 query: query,
-                session_id: currentSessionId
-            })
+                session_id: currentSessionId,
+            }),
         });
 
         if (!response.ok) throw new Error('Query failed');
 
         const data = await response.json();
-        
+
         // Update session ID if new
         if (!currentSessionId) {
             currentSessionId = data.session_id;
@@ -160,7 +159,6 @@ async function sendMessage() {
         // Replace loading message with response
         loadingMessage.remove();
         addMessage(data.answer, 'assistant', data.sources);
-
     } catch (error) {
         // Replace loading message with error
         loadingMessage.remove();
@@ -192,19 +190,21 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}${isWelcome ? ' welcome-message' : ''}`;
     messageDiv.id = `message-${messageId}`;
-    
+
     // Convert markdown to HTML for assistant messages
     const displayContent = type === 'assistant' ? marked.parse(content) : escapeHtml(content);
-    
+
     let html = `<div class="message-content">${displayContent}</div>`;
-    
+
     if (sources && sources.length > 0) {
-        const sourceHtml = sources.map(s => {
-            const safeText = escapeHtml(s.text);
-            return s.link
-                ? `<a href="${escapeHtml(s.link)}" target="_blank" rel="noopener noreferrer">${safeText}</a>`
-                : safeText;
-        }).join(', ');
+        const sourceHtml = sources
+            .map((s) => {
+                const safeText = escapeHtml(s.text);
+                return s.link
+                    ? `<a href="${escapeHtml(s.link)}" target="_blank" rel="noopener noreferrer">${safeText}</a>`
+                    : safeText;
+            })
+            .join(', ');
 
         html += `
             <details class="sources-collapsible">
@@ -213,11 +213,11 @@ function addMessage(content, type, sources = null, isWelcome = false) {
             </details>
         `;
     }
-    
+
     messageDiv.innerHTML = html;
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+
     return messageId;
 }
 
@@ -233,7 +233,12 @@ function escapeHtml(text) {
 async function createNewSession() {
     currentSessionId = null;
     chatMessages.innerHTML = '';
-    addMessage('Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?', 'assistant', null, true);
+    addMessage(
+        'Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?',
+        'assistant',
+        null,
+        true
+    );
 }
 
 // Load course statistics
@@ -242,26 +247,25 @@ async function loadCourseStats() {
         console.log('Loading course stats...');
         const response = await fetch(`${API_URL}/courses`);
         if (!response.ok) throw new Error('Failed to load course stats');
-        
+
         const data = await response.json();
         console.log('Course data received:', data);
-        
+
         // Update stats in UI
         if (totalCourses) {
             totalCourses.textContent = data.total_courses;
         }
-        
+
         // Update course titles
         if (courseTitles) {
             if (data.course_titles && data.course_titles.length > 0) {
                 courseTitles.innerHTML = data.course_titles
-                    .map(title => `<div class="course-title-item">${title}</div>`)
+                    .map((title) => `<div class="course-title-item">${title}</div>`)
                     .join('');
             } else {
                 courseTitles.innerHTML = '<span class="no-courses">No courses available</span>';
             }
         }
-        
     } catch (error) {
         console.error('Error loading course stats:', error);
         // Set default values on error

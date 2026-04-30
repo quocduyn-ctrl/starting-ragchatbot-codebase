@@ -54,3 +54,22 @@ The application will be available at:
 - Web Interface: `http://localhost:8000`
 - API Documentation: `http://localhost:8000/docs`
 
+## Frontend Code Quality
+
+Frontend assets in `frontend/` (HTML, CSS, JS) are formatted with [Prettier](https://prettier.io/). Configuration lives in `.prettierrc`.
+
+Requires Node.js. The first invocation auto-runs `npm install` to fetch Prettier into `node_modules/`.
+
+```bash
+./scripts/format-frontend.sh   # rewrite frontend files in place
+./scripts/check-quality.sh     # verify formatting (CI-friendly, non-zero on drift)
+```
+
+Or via npm:
+
+```bash
+npm run format         # writes
+npm run format:check   # checks
+npm run quality        # alias for format:check; extend with linters later
+```
+

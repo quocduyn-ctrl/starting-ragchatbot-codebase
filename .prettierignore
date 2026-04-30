@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Python (handled separately if/when black is added for backend)
+backend/
+*.py
+.venv/
+venv/
+
+# Generated / data
+backend/chroma_db/
+docs/
+uploads/
+
+# Lock files and build artifacts
+uv.lock
+package-lock.json
+
+# VCS / config that shouldn't be reformatted
+.git/
+.trees/
+
+# Project meta files we don't want auto-formatted
+CLAUDE.md
+frontend-changes.md
